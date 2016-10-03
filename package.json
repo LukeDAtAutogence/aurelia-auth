@@ -1,16 +1,16 @@
 {
-  "name": "aurelia-auth",
+  "name": "aurelia-auth-ld",
   "version": "3.0.2",
-  "description": "Plugin for security token service, social media authentication and local authentication together with other authentication utilities",
+  "description": "Plugin for security token service, social media authentication and local authentication together with other authentication utilities, forked from https://github.com/paulvanbladel/aurelia-auth, with addition support for no-popup.",
   "keywords": [
     "aurelia",
     "oauth",
     "authentication",
     "auth"
   ],
-  "homepage": "https://github.com/paulvanbladel/aurelia-auth#readme",
+  "homepage": "https://github.com/LukeDAtAutogence/aurelia-auth#readme",
   "bugs": {
-    "url": "https://github.com/paulvanbladel/aurelia-auth/issues"
+    "url": "https://github.com/LukeDAtAutogence/aurelia-auth/issues"
   },
   "license": "MIT",
   "author": "paul van bladel",
@@ -18,7 +18,7 @@
   "typings": "dist/aurelia-auth.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/paulvanbladel/aurelia-auth.git"
+    "url": "git+https://github.com/LukeDAtAutogence/aurelia-auth.git"
   },
   "jspm": {
     "registry": "npm",

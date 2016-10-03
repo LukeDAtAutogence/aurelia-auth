@@ -54,29 +54,37 @@ export class OAuth2 {
 
     let url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
-    let openPopup;
-    if (this.config.platform === 'mobile') {
-      openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
-    } else {
-      openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
-    }
-
-    return openPopup
-      .then(oauthData => {
-        if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
-          return Promise.reject('OAuth 2.0 state parameter mismatch.');
+     if(current.display === 'page')
+      {
+         console.log('page');
+         window.location = url;
+      }
+      else
+      {
+        let openPopup;
+        if (this.config.platform === 'mobile') {
+          openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
+        } else {
+          openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
         }
 
-        if (current.responseType.toUpperCase().includes('TOKEN')) { //meaning implicit flow or hybrid flow
-          if (!this.verifyIdToken(oauthData, current.name)) {
-            return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
-          }
+        return openPopup
+          .then(oauthData => {
+            if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
+              return Promise.reject('OAuth 2.0 state parameter mismatch.');
+            }
 
-          return oauthData;
-        }
+            if (current.responseType.toUpperCase().includes('TOKEN')) { //meaning implicit flow or hybrid flow
+              if (!this.verifyIdToken(oauthData, current.name)) {
+                return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
+              }
 
-        return this.exchangeForToken(oauthData, userData, current); //responseType is authorization code only (no token nor id_token)
-      });
+              return oauthData;
+            }
+
+            return this.exchangeForToken(oauthData, userData, current); //responseType is authorization code only (no token nor id_token)
+          });
+      }
   }
 
   verifyIdToken(oauthData, providerName) {

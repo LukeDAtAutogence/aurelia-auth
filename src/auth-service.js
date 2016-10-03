@@ -109,6 +109,18 @@ export class AuthService {
         return response;
       });
   }
+  
+
+  setTokenFromRedirect() {
+        let provider = this.oAuth2;
+
+        var response = provider.setTokenFromRedirect();
+        this.auth.setToken(response, null);
+        this.eventAggregator.publish('auth:authenticate', response);
+        return response;
+      
+    }; 
+
 
   unlink(provider) {
     let unlinkUrl = this.config.baseUrl ?
