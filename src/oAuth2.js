@@ -1,5 +1,5 @@
 import {inject} from 'aurelia-dependency-injection';
-import {extend, forEach, isFunction, isString, joinUrl, camelCase, status} from './auth-utilities';
+import {extend, forEach, isFunction, isString, joinUrl, camelCase, status, parseQueryString} from './auth-utilities';
 import {Storage} from './storage';
 import {Popup} from './popup';
 import {BaseConfig} from './base-config';
@@ -54,38 +54,44 @@ export class OAuth2 {
 
     let url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
-     if(current.display === 'page')
-      {
-         console.log('page');
-         window.location = url;
+    if (current.display === 'page') {
+      window.location = url;
+    } else {
+      let openPopup;
+      if (this.config.platform === 'mobile') {
+        openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
+      } else {
+        openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
       }
-      else
-      {
-        let openPopup;
-        if (this.config.platform === 'mobile') {
-          openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
-        } else {
-          openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
-        }
 
-        return openPopup
-          .then(oauthData => {
-            if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
-              return Promise.reject('OAuth 2.0 state parameter mismatch.');
+      return openPopup
+        .then(oauthData => {
+          if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
+            return Promise.reject('OAuth 2.0 state parameter mismatch.');
+          }
+
+          if (current.responseType.toUpperCase().includes('TOKEN')) { //meaning implicit flow or hybrid flow
+            if (!this.verifyIdToken(oauthData, current.name)) {
+              return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
             }
 
-            if (current.responseType.toUpperCase().includes('TOKEN')) { //meaning implicit flow or hybrid flow
-              if (!this.verifyIdToken(oauthData, current.name)) {
-                return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
-              }
+            return oauthData;
+          }
 
-              return oauthData;
-            }
-
-            return this.exchangeForToken(oauthData, userData, current); //responseType is authorization code only (no token nor id_token)
-          });
-      }
+          return this.exchangeForToken(oauthData, userData, current); //responseType is authorization code only (no token nor id_token)
+        });
+    }
   }
+
+  setTokenFromRedirect() {
+    let queryParams = location.search.substring(1).replace(/\/$/, '');
+    let hashParams = location.hash.substring(1).replace(/[\/$]/, '');
+    let hash = parseQueryString(hashParams);
+    let qs = parseQueryString(queryParams);
+    extend(qs, hash);
+    return qs;
+  }
+
 
   verifyIdToken(oauthData, providerName) {
     let idToken = oauthData && oauthData[this.config.responseIdTokenProp];

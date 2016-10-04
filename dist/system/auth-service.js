@@ -35,7 +35,7 @@ System.register(['aurelia-dependency-injection', 'aurelia-fetch-client', 'aureli
       _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
         return typeof obj;
       } : function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
       };
 
       _export('AuthService', AuthService = (_dec = inject(HttpClient, Authentication, OAuth1, OAuth2, BaseConfig, EventAggregator), _dec(_class = function () {
@@ -62,6 +62,10 @@ System.register(['aurelia-dependency-injection', 'aurelia-fetch-client', 'aureli
 
         AuthService.prototype.getTokenPayload = function getTokenPayload() {
           return this.auth.getPayload();
+        };
+
+        AuthService.prototype.setToken = function setToken(token) {
+          this.auth.setToken(Object.defineProperty({}, this.config.tokenName, { value: token }));
         };
 
         AuthService.prototype.signup = function signup(displayName, email, password) {
@@ -136,6 +140,14 @@ System.register(['aurelia-dependency-injection', 'aurelia-fetch-client', 'aureli
             _this3.eventAggregator.publish('auth:authenticate', response);
             return response;
           });
+        };
+
+        AuthService.prototype.setTokenFromRedirect = function setTokenFromRedirect() {
+          var provider = this.oAuth2;
+          var response = provider.setTokenFromRedirect();
+          this.auth.setToken(response, null);
+          this.eventAggregator.publish('auth:authenticate', response);
+          return response;
         };
 
         AuthService.prototype.unlink = function unlink(provider) {

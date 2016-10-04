@@ -1,7 +1,7 @@
 var _dec, _class;
 
 import { inject } from 'aurelia-dependency-injection';
-import { extend, forEach, isFunction, isString, joinUrl, camelCase, status } from './auth-utilities';
+import { extend, forEach, isFunction, isString, joinUrl, camelCase, status, parseQueryString } from './auth-utilities';
 import { Storage } from './storage';
 import { Popup } from './popup';
 import { BaseConfig } from './base-config';
@@ -53,28 +53,41 @@ export let OAuth2 = (_dec = inject(Storage, Popup, HttpClient, BaseConfig, Authe
 
     let url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
-    let openPopup;
-    if (this.config.platform === 'mobile') {
-      openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
+    if (current.display === 'page') {
+      window.location = url;
     } else {
-      openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
-    }
-
-    return openPopup.then(oauthData => {
-      if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
-        return Promise.reject('OAuth 2.0 state parameter mismatch.');
+      let openPopup;
+      if (this.config.platform === 'mobile') {
+        openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
+      } else {
+        openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
       }
 
-      if (current.responseType.toUpperCase().includes('TOKEN')) {
-        if (!this.verifyIdToken(oauthData, current.name)) {
-          return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
+      return openPopup.then(oauthData => {
+        if (oauthData.state && oauthData.state !== this.storage.get(stateName)) {
+          return Promise.reject('OAuth 2.0 state parameter mismatch.');
         }
 
-        return oauthData;
-      }
+        if (current.responseType.toUpperCase().includes('TOKEN')) {
+          if (!this.verifyIdToken(oauthData, current.name)) {
+            return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
+          }
 
-      return this.exchangeForToken(oauthData, userData, current);
-    });
+          return oauthData;
+        }
+
+        return this.exchangeForToken(oauthData, userData, current);
+      });
+    }
+  }
+
+  setTokenFromRedirect() {
+    let queryParams = location.search.substring(1).replace(/\/$/, '');
+    let hashParams = location.hash.substring(1).replace(/[\/$]/, '');
+    let hash = parseQueryString(hashParams);
+    let qs = parseQueryString(queryParams);
+    extend(qs, hash);
+    return qs;
   }
 
   verifyIdToken(oauthData, providerName) {

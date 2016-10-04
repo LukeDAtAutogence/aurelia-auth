@@ -72,28 +72,41 @@ var OAuth2 = exports.OAuth2 = (_dec = (0, _aureliaDependencyInjection.inject)(_s
 
     var url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
-    var openPopup = void 0;
-    if (this.config.platform === 'mobile') {
-      openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
+    if (current.display === 'page') {
+      window.location = url;
     } else {
-      openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
-    }
-
-    return openPopup.then(function (oauthData) {
-      if (oauthData.state && oauthData.state !== _this.storage.get(stateName)) {
-        return Promise.reject('OAuth 2.0 state parameter mismatch.');
+      var openPopup = void 0;
+      if (this.config.platform === 'mobile') {
+        openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
+      } else {
+        openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
       }
 
-      if (current.responseType.toUpperCase().includes('TOKEN')) {
-        if (!_this.verifyIdToken(oauthData, current.name)) {
-          return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
+      return openPopup.then(function (oauthData) {
+        if (oauthData.state && oauthData.state !== _this.storage.get(stateName)) {
+          return Promise.reject('OAuth 2.0 state parameter mismatch.');
         }
 
-        return oauthData;
-      }
+        if (current.responseType.toUpperCase().includes('TOKEN')) {
+          if (!_this.verifyIdToken(oauthData, current.name)) {
+            return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
+          }
 
-      return _this.exchangeForToken(oauthData, userData, current);
-    });
+          return oauthData;
+        }
+
+        return _this.exchangeForToken(oauthData, userData, current);
+      });
+    }
+  };
+
+  OAuth2.prototype.setTokenFromRedirect = function setTokenFromRedirect() {
+    var queryParams = location.search.substring(1).replace(/\/$/, '');
+    var hashParams = location.hash.substring(1).replace(/[\/$]/, '');
+    var hash = (0, _authUtilities.parseQueryString)(hashParams);
+    var qs = (0, _authUtilities.parseQueryString)(queryParams);
+    (0, _authUtilities.extend)(qs, hash);
+    return qs;
   };
 
   OAuth2.prototype.verifyIdToken = function verifyIdToken(oauthData, providerName) {

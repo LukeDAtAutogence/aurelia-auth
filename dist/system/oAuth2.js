@@ -3,7 +3,7 @@
 System.register(['aurelia-dependency-injection', './auth-utilities', './storage', './popup', './base-config', './authentication', 'aurelia-fetch-client'], function (_export, _context) {
   "use strict";
 
-  var inject, extend, forEach, isFunction, isString, joinUrl, camelCase, status, Storage, Popup, BaseConfig, Authentication, HttpClient, json, _dec, _class, OAuth2;
+  var inject, extend, forEach, isFunction, isString, joinUrl, camelCase, status, parseQueryString, Storage, Popup, BaseConfig, Authentication, HttpClient, json, _dec, _class, OAuth2;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -22,6 +22,7 @@ System.register(['aurelia-dependency-injection', './auth-utilities', './storage'
       joinUrl = _authUtilities.joinUrl;
       camelCase = _authUtilities.camelCase;
       status = _authUtilities.status;
+      parseQueryString = _authUtilities.parseQueryString;
     }, function (_storage) {
       Storage = _storage.Storage;
     }, function (_popup) {
@@ -84,28 +85,41 @@ System.register(['aurelia-dependency-injection', './auth-utilities', './storage'
 
           var url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
-          var openPopup = void 0;
-          if (this.config.platform === 'mobile') {
-            openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
+          if (current.display === 'page') {
+            window.location = url;
           } else {
-            openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
-          }
-
-          return openPopup.then(function (oauthData) {
-            if (oauthData.state && oauthData.state !== _this.storage.get(stateName)) {
-              return Promise.reject('OAuth 2.0 state parameter mismatch.');
+            var openPopup = void 0;
+            if (this.config.platform === 'mobile') {
+              openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).eventListener(current.redirectUri);
+            } else {
+              openPopup = this.popup.open(url, current.name, current.popupOptions, current.redirectUri).pollPopup();
             }
 
-            if (current.responseType.toUpperCase().includes('TOKEN')) {
-              if (!_this.verifyIdToken(oauthData, current.name)) {
-                return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
+            return openPopup.then(function (oauthData) {
+              if (oauthData.state && oauthData.state !== _this.storage.get(stateName)) {
+                return Promise.reject('OAuth 2.0 state parameter mismatch.');
               }
 
-              return oauthData;
-            }
+              if (current.responseType.toUpperCase().includes('TOKEN')) {
+                if (!_this.verifyIdToken(oauthData, current.name)) {
+                  return Promise.reject('OAuth 2.0 Nonce parameter mismatch.');
+                }
 
-            return _this.exchangeForToken(oauthData, userData, current);
-          });
+                return oauthData;
+              }
+
+              return _this.exchangeForToken(oauthData, userData, current);
+            });
+          }
+        };
+
+        OAuth2.prototype.setTokenFromRedirect = function setTokenFromRedirect() {
+          var queryParams = location.search.substring(1).replace(/\/$/, '');
+          var hashParams = location.hash.substring(1).replace(/[\/$]/, '');
+          var hash = parseQueryString(hashParams);
+          var qs = parseQueryString(queryParams);
+          extend(qs, hash);
+          return qs;
         };
 
         OAuth2.prototype.verifyIdToken = function verifyIdToken(oauthData, providerName) {

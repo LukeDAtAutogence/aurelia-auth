@@ -33,6 +33,10 @@ export let AuthService = (_dec = inject(HttpClient, Authentication, OAuth1, OAut
     return this.auth.getPayload();
   }
 
+  setToken(token) {
+    this.auth.setToken(Object.defineProperty({}, this.config.tokenName, { value: token }));
+  }
+
   signup(displayName, email, password) {
     let signupUrl = this.auth.getSignupUrl();
     let content;
@@ -99,6 +103,14 @@ export let AuthService = (_dec = inject(HttpClient, Authentication, OAuth1, OAut
       this.eventAggregator.publish('auth:authenticate', response);
       return response;
     });
+  }
+
+  setTokenFromRedirect() {
+    let provider = this.oAuth2;
+    let response = provider.setTokenFromRedirect();
+    this.auth.setToken(response, null);
+    this.eventAggregator.publish('auth:authenticate', response);
+    return response;
   }
 
   unlink(provider) {
