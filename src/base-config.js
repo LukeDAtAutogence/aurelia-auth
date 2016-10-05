@@ -41,6 +41,8 @@ export class BaseConfig {
           url: '/auth/identSrv',
           //authorizationEndpoint: 'http://localhost:22530/connect/authorize',
           redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
+          endSessionUri: '/connect/endsession',
+          postLogOurRedirectUri: '',
           scope: ['profile', 'openid'],
           responseType: 'code',
           scopePrefix: '',

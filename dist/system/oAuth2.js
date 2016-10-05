@@ -62,6 +62,14 @@ System.register(['aurelia-dependency-injection', './auth-utilities', './storage'
           };
         }
 
+        OAuth2.prototype.endSession = function endSession(options) {
+          var current = extend({}, this.defaults, options);
+          var url = current.endSessionUri;
+          var postLogOurRedirectUri = current.postLogOurRedirectUri;
+          var idToken = this.auth.getIdToken();
+          window.location.assign(url + '?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogOurRedirectUri);
+        };
+
         OAuth2.prototype.open = function open(options, userData) {
           var _this = this;
 
@@ -86,7 +94,7 @@ System.register(['aurelia-dependency-injection', './auth-utilities', './storage'
           var url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
           if (current.display === 'page') {
-            window.location = url;
+            window.location.assign(url);
           } else {
             var openPopup = void 0;
             if (this.config.platform === 'mobile') {

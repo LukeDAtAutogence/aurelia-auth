@@ -37,6 +37,13 @@ export class AuthService {
     this.auth.setToken(Object.defineProperty( {}, this.config.tokenName, { value: token } ));
   }
 
+  endSession(name) {
+    let provider = this.oAuth2;
+    this.eventAggregator.publish('auth:logout');
+    provider.endSession(this.config.providers[name]);
+    return this.auth.logout();
+  }
+
   signup(displayName, email, password) {
     let signupUrl = this.auth.getSignupUrl();
     let content;

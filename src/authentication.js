@@ -41,6 +41,10 @@ export class Authentication {
     return this.storage.get(this.tokenName);
   }
 
+  getIdToken() {
+    return this.storage.get(this.idTokenName);
+  }
+
   getPayload() {
     let token = this.storage.get(this.tokenName);
     return this.decomposeToken(token);

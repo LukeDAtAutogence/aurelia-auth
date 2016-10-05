@@ -76,6 +76,8 @@ define(['exports', './auth-utilities'], function (exports, _authUtilities) {
             url: '/auth/identSrv',
 
             redirectUri: window.location.origin || window.location.protocol + '//' + window.location.host,
+            endSessionUri: '/connect/endsession',
+            postLogOurRedirectUri: '',
             scope: ['profile', 'openid'],
             responseType: 'code',
             scopePrefix: '',

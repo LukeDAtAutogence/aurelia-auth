@@ -57,6 +57,13 @@ var AuthService = exports.AuthService = (_dec = (0, _aureliaDependencyInjection.
     this.auth.setToken(Object.defineProperty({}, this.config.tokenName, { value: token }));
   };
 
+  AuthService.prototype.endSession = function endSession(name) {
+    var provider = this.oAuth2;
+    this.eventAggregator.publish('auth:logout');
+    provider.endSession(this.config.providers[name]);
+    return this.auth.logout();
+  };
+
   AuthService.prototype.signup = function signup(displayName, email, password) {
     var _this = this;
 

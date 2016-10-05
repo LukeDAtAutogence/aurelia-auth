@@ -49,6 +49,14 @@ var OAuth2 = exports.OAuth2 = (_dec = (0, _aureliaDependencyInjection.inject)(_s
     };
   }
 
+  OAuth2.prototype.endSession = function endSession(options) {
+    var current = (0, _authUtilities.extend)({}, this.defaults, options);
+    var url = current.endSessionUri;
+    var postLogOurRedirectUri = current.postLogOurRedirectUri;
+    var idToken = this.auth.getIdToken();
+    window.location.assign(url + '?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogOurRedirectUri);
+  };
+
   OAuth2.prototype.open = function open(options, userData) {
     var _this = this;
 
@@ -73,7 +81,7 @@ var OAuth2 = exports.OAuth2 = (_dec = (0, _aureliaDependencyInjection.inject)(_s
     var url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
     if (current.display === 'page') {
-      window.location = url;
+      window.location.assign(url);
     } else {
       var openPopup = void 0;
       if (this.config.platform === 'mobile') {

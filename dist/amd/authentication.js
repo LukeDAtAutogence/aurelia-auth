@@ -66,6 +66,10 @@ define(['exports', 'aurelia-dependency-injection', './base-config', './storage',
       return this.storage.get(this.tokenName);
     };
 
+    Authentication.prototype.getIdToken = function getIdToken() {
+      return this.storage.get(this.idTokenName);
+    };
+
     Authentication.prototype.getPayload = function getPayload() {
       var token = this.storage.get(this.tokenName);
       return this.decomposeToken(token);

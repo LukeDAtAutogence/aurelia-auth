@@ -32,6 +32,14 @@ export let OAuth2 = (_dec = inject(Storage, Popup, HttpClient, BaseConfig, Authe
     };
   }
 
+  endSession(options) {
+    let current = extend({}, this.defaults, options);
+    let url = current.endSessionUri;
+    let postLogOurRedirectUri = current.postLogOurRedirectUri;
+    let idToken = this.auth.getIdToken();
+    window.location.assign(url + '?id_token_hint=' + idToken + '&post_logout_redirect_uri=' + postLogOurRedirectUri);
+  }
+
   open(options, userData) {
     let current = extend({}, this.defaults, options);
 
@@ -54,7 +62,7 @@ export let OAuth2 = (_dec = inject(Storage, Popup, HttpClient, BaseConfig, Authe
     let url = current.authorizationEndpoint + '?' + this.buildQueryString(current);
 
     if (current.display === 'page') {
-      window.location = url;
+      window.location.assign(url);
     } else {
       let openPopup;
       if (this.config.platform === 'mobile') {

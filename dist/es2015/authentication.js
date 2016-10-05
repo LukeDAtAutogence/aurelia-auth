@@ -37,6 +37,10 @@ export let Authentication = (_dec = inject(Storage, BaseConfig), _dec(_class = c
     return this.storage.get(this.tokenName);
   }
 
+  getIdToken() {
+    return this.storage.get(this.idTokenName);
+  }
+
   getPayload() {
     let token = this.storage.get(this.tokenName);
     return this.decomposeToken(token);

@@ -53,6 +53,10 @@ var Authentication = exports.Authentication = (_dec = (0, _aureliaDependencyInje
     return this.storage.get(this.tokenName);
   };
 
+  Authentication.prototype.getIdToken = function getIdToken() {
+    return this.storage.get(this.idTokenName);
+  };
+
   Authentication.prototype.getPayload = function getPayload() {
     var token = this.storage.get(this.tokenName);
     return this.decomposeToken(token);

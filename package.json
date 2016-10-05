@@ -1,6 +1,6 @@
 {
   "name": "aurelia-auth-ld",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "Plugin for security token service, social media authentication and local authentication together with other authentication utilities, forked from https://github.com/paulvanbladel/aurelia-auth, with addition support for no-popup.",
   "keywords": [
     "aurelia",
